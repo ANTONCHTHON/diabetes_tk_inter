@@ -4,6 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from sklearn.tree import DecisionTreeClassifier
+from sklearn import metrics
 import pickle
 import tkinter as tk
 from sklearn.preprocessing import MinMaxScaler
@@ -38,7 +39,7 @@ if not os.path.exists('clf.sav'):
     X_train, X_test, y_train, y_test = train_test_split(
     data[["Glucose", "Insulin", "BMI", "Age"]],
     data[target_name],
-    test_size=0.3,
+    test_size=0.2,
     random_state=0,
     shuffle=True)
 
@@ -46,7 +47,7 @@ if not os.path.exists('clf.sav'):
     horizontal_concat = pd.concat([X_train, y_train], axis=1)
     data_1 = horizontal_concat.loc[(horizontal_concat['Outcome']== 1)]
     data_0 = horizontal_concat.loc[(horizontal_concat['Outcome']== 0)]
-    vertical_concat = pd.concat([data_1, data_0[:180]], axis=0)
+    vertical_concat = pd.concat([data_1, data_0[:len(data_1)]], axis=0)
     vertical_concat = shuffle(vertical_concat, random_state=0)
     X_train=vertical_concat.drop(target_name, axis=1)
     y_train=vertical_concat[target_name]
@@ -56,6 +57,9 @@ if not os.path.exists('clf.sav'):
 
     #Обучение модели
     model.fit(X_train, y_train)
+    y_pred=model.predict(X_test)
+    confusion_matrix = metrics.confusion_matrix(y_test, y_pred)
+    print(confusion_matrix)
 
     pickle.dump(model, open('clf.sav', 'wb'))
 
@@ -80,12 +84,13 @@ def result(prediction):
     else:
         bg_color='#8DAC36'
         txt_color='#400A4E'
+        font=("Arial", 25)
         window.config(bg=bg_color)
 
-        space_label = tk.Label(window, text="",  font=("Arial", 25), bg=bg_color , fg=txt_color)
+        space_label = tk.Label(window, text="",  font=font, bg=bg_color , fg=txt_color)
         space_label.pack()
 
-        ok_label = tk.Label(window, text="No diabetes",  font=("Arial", 25) , bg=bg_color, fg=txt_color)
+        ok_label = tk.Label(window, text="No diabetes",  font=font , bg=bg_color, fg=txt_color)
         ok_label.pack()
 
     heart_label = tk.Label(window, text="♥ ♥ ♥",  font=("Arial", 40), bg=bg_color , fg=txt_color)
@@ -118,8 +123,10 @@ def make_prediction():
 root = tk.Tk()
 
 root.title("Предсказатель диабета")
-root.geometry("700x500")
-root.eval('tk::PlaceWindow . center') 
+ws = root.winfo_screenwidth() # width of the screen
+hs = root.winfo_screenheight()
+root.geometry(str(int(ws*0.5))+"x"+str(int(hs*0.7))+"+"+str(int(ws*0.25))+"+"+str(int(hs*0.15)))
+
 
 
 bg_color='#0D4261'
@@ -128,32 +135,32 @@ txt_color='#B99BBD'
 root.config(bg=bg_color)
 
 
+font=('Arial', 25)
 
-
-glucose_label = tk.Label(root, text="Glucose",  font=("Arial", 25) , bg=bg_color, fg=txt_color)
+glucose_label = tk.Label(root, text="Glucose",  font=font , bg=bg_color, fg=txt_color)
 glucose_label.pack()
-glucose_entry = tk.Entry(root, width=20, font=('Arial', 25))
+glucose_entry = tk.Entry(root, width=20, font=font)
 glucose_entry.pack()
 
-insulin_label = tk.Label(root, text="Insulin",  font=("Arial", 25),   bg=bg_color, fg=txt_color)
+insulin_label = tk.Label(root, text="Insulin",  font=font,   bg=bg_color, fg=txt_color)
 insulin_label.pack()
-insulin_entry = tk.Entry(root, width=20, font=('Arial', 25))
+insulin_entry = tk.Entry(root, width=20, font=font)
 insulin_entry.pack()
 
-bmi_label = tk.Label(root, text="BMI",  font=("Arial", 25) , bg=bg_color, fg=txt_color)
+bmi_label = tk.Label(root, text="BMI",  font=font , bg=bg_color, fg=txt_color)
 bmi_label.pack()
-bmi_entry = tk.Entry(root, width=20, font=('Arial', 25))
+bmi_entry = tk.Entry(root, width=20, font=font)
 bmi_entry.pack()
 
-age_label = tk.Label(root, text="Age",  font=("Arial", 25), bg=bg_color , fg=txt_color)
+age_label = tk.Label(root, text="Age",  font=font, bg=bg_color , fg=txt_color)
 age_label.pack()
-age_entry = tk.Entry(root, width=20, font=('Arial', 25))
+age_entry = tk.Entry(root, width=20, font=font)
 age_entry.pack()
 
-space_label = tk.Label(root, text="",  font=("Arial", 25), bg=bg_color , fg=txt_color)
+space_label = tk.Label(root, text="",  font=font, bg=bg_color , fg=txt_color)
 space_label.pack()
 
-predict_button = tk.Button(root, text="Predict", font=("Arial", 25), command=make_prediction, bg=txt_color)
+predict_button = tk.Button(root, text="Perdict", font=font, command=make_prediction, bg=txt_color)
 predict_button.pack()
 
 heart_label = tk.Label(root, text="\n♥ ♥ ♥ ♥ ♥ ♥",  font=("Arial", 30), bg=bg_color , fg=txt_color)
